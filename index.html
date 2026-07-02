@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f3f1ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Gomi Dictionary / ゴミ辞典</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗑️</text></svg>">
+<style>
+/* Gomi Dictionary - 移动端体验优化 v2 */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f3f1ec;--card:#fff;--primary:#3a7d4f;--primary-light:#deede2;--text:#1a1a1a;--text-secondary:#6b6b6b;--text-tertiary:#999;--border:#e2ddd4;--tag-bg:#eef2ee;--shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--shadow-lg:0 4px 12px rgba(0,0,0,.08);--radius:12px;--radius-sm:8px;--font:-apple-system,'Hiragino Sans','Noto Sans CJK SC','Segoe UI',sans-serif;--safe-bottom:env(safe-area-inset-bottom,0);--nav-height:56px;--overlay:rgba(0,0,0,.5);--accent-orange:#e67e22;--cat-moeru:#c0392b;--cat-moenai:#c7952b;--cat-recycle:#3a7d4f;--cat-sodai:#8e44ad;--cat-not_collected:#636e72;--cat-clean_center:#d68910}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a1e;--card:#252529;--primary:#4caf6a;--primary-light:#1e3328;--text:#e8e8e8;--text-secondary:#aaa;--text-tertiary:#777;--border:#3a3a3e;--tag-bg:#2a2a2e;--shadow:0 1px 3px rgba(0,0,0,.2),0 1px 2px rgba(0,0,0,.15);--shadow-lg:0 4px 12px rgba(0,0,0,.25)}}
+html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+#app{max-width:520px;margin:0 auto;padding:0 0 calc(20px + var(--safe-bottom))}
+header{position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 14px 6px;border-bottom:1px solid var(--border)}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+h1{font-size:20px;font-weight:700;color:var(--primary);letter-spacing:-.3px;user-select:none}
+.lang-switch{display:flex;gap:2px;background:var(--border);border-radius:6px;padding:2px}
+.lang-btn{background:none;border:none;padding:5px 11px;border-radius:5px;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--text-secondary);transition:all .15s;-webkit-tap-highlight-color:transparent}
+.lang-btn:active{transform:scale(.95)}
+.lang-btn.active{background:var(--primary);color:#fff}
+.subtitle{font-size:12px;color:var(--text-tertiary);margin-top:1px;text-align:center}
+.search-section{padding:8px 14px 0}
+.city-selector{display:flex;gap:6px;margin-bottom:8px;font-size:13px}
+.city-selector select{flex:1;padding:7px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:13px;color:var(--text);appearance:auto;cursor:pointer}
+.input-group{display:flex;gap:6px;position:relative}
+#search-input{flex:1;height:44px;padding:0 36px 0 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:16px;background:var(--card);color:var(--text);outline:none;transition:border .2s,box-shadow .2s}
+#search-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(58,125,79,.12)}
+#search-input::placeholder{color:var(--text-tertiary)}
+#clear-btn{position:absolute;left:calc(100% - 82px);top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;color:var(--text-tertiary);cursor:pointer;padding:4px;display:none;z-index:2;line-height:1;-webkit-tap-highlight-color:transparent}
+#clear-btn:active{transform:translateY(-50%) scale(.85)}
+#search-input:not(:placeholder-shown) ~ #clear-btn{display:block}
+#mic-btn,#search-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:none;border-radius:var(--radius);font-size:20px;cursor:pointer;background:var(--card);border:1.5px solid var(--border);transition:all .15s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+#mic-btn:active,#search-btn:active{transform:scale(.92)}
+#mic-btn:hover,#search-btn:hover{border-color:var(--primary);background:var(--primary-light)}
+#mic-btn.listening{background:#fff0e0;border-color:var(--accent-orange);animation:pulse 1.4s infinite}
+.quick-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-bottom:4px}
+.tag{padding:5px 12px;background:var(--tag-bg);border-radius:20px;font-size:12px;cursor:pointer;transition:all .12s;color:var(--text-secondary);border:1px solid transparent;user-select:none;-webkit-tap-highlight-color:transparent}
+.tag:active{transform:scale(.94);background:var(--primary-light);color:var(--primary);border-color:var(--primary)}
+.suggestions{position:absolute;top:100%;left:0;right:80px;z-index:40;background:var(--card);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);margin-top:2px;max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none}
+.suggestions.show{display:block}
+.suggestion-item{padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;display:flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}
+.suggestion-item:last-child{border-bottom:none}
+.suggestion-item:active,.suggestion-item.highlight{background:var(--primary-light)}
+.suggestion-item .s-cat{font-size:10px;padding:1px 6px;border-radius:4px;color:#fff;font-weight:600}
+.suggestion-item .s-name{flex:1}
+.suggestion-item .s-ja{font-size:11px;color:var(--text-tertiary)}
+.result-section{margin:6px 14px 0;animation:fadeUp .25s ease}
+.result-card{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg)}
+.result-header{padding:14px 16px;color:#fff;display:flex;align-items:center;gap:10px}
+.result-header .emoji{font-size:24px}
+.result-header .cat-title{font-size:16px;font-weight:600}
+.result-header .bag-name{font-size:12px;opacity:.85;margin-top:1px}
+.result-body{padding:14px 16px;background:var(--card)}
+.result-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0}
+.result-item .label{font-size:12px;color:var(--text-secondary);min-width:56px;flex-shrink:0}
+.result-item .value{font-size:14px;font-weight:500;word-break:break-word;color:var(--text)}
+.result-item .value.note{font-weight:400;font-size:13px;color:var(--text-secondary);line-height:1.6}
+.result-divider{border:none;border-top:1px solid var(--border);margin:6px 0}
+.no-result{text-align:center;padding:30px 16px;color:var(--text-secondary);font-size:14px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+.match-info{font-size:12px;color:var(--text-tertiary);margin-bottom:6px;padding:4px 0}
+.help-section{padding:14px 14px 0}
+.help-section h2{font-size:15px;margin-bottom:8px}
+.categories-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.cat-card{border-radius:var(--radius-sm);padding:10px 12px;background:var(--card);border-left:3px solid var(--primary);box-shadow:var(--shadow);transition:transform .15s}
+.cat-card:active{transform:scale(.97)}
+.cat-card .cat-name{font-size:13px;font-weight:600}
+.cat-card .cat-bag{font-size:11px;margin-top:2px;font-weight:500}
+.cat-card .cat-desc{font-size:11px;color:var(--text-secondary);margin-top:3px;line-height:1.4}
+.history-section{padding:8px 14px}
+.history-header{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-tertiary);margin-bottom:4px}
+.history-clear{background:none;border:none;font-size:12px;color:var(--text-tertiary);cursor:pointer;padding:2px 4px}
+.history-item{display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;border-bottom:1px solid var(--border);font-size:14px;-webkit-tap-highlight-color:transparent}
+.history-item:active{background:var(--primary-light);margin:0 -14px;padding:8px 14px;border-radius:var(--radius-sm)}
+.history-item:last-child{border:none}
+.history-item .h-icon{font-size:14px;color:var(--text-tertiary)}
+.history-item .h-text{flex:1}
+.history-item .h-del{background:none;border:none;font-size:14px;color:var(--text-tertiary);cursor:pointer;padding:2px}
+.speech-status{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.8);color:#fff;padding:24px 32px;border-radius:20px;font-size:18px;z-index:999;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 8px 32px rgba(0,0,0,.3);animation:fadeUp .2s ease}
+.speech-status .hint{font-size:13px;color:#bbb;margin-top:8px}
+.speech-wave{display:flex;gap:4px;justify-content:center;margin-top:12px}
+.speech-wave span{width:4px;height:20px;background:#fff;border-radius:2px;animation:wave 1s ease-in-out infinite}
+.speech-wave span:nth-child(2){animation-delay:.15s;height:28px}
+.speech-wave span:nth-child(3){animation-delay:.3s;height:36px}
+.speech-wave span:nth-child(4){animation-delay:.45s;height:28px}
+.speech-wave span:nth-child(5){animation-delay:.6s;height:20px}
+@keyframes wave{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+footer{padding:16px 14px calc(8px + var(--safe-bottom));text-align:center}
+footer p{font-size:11px;color:var(--text-tertiary)}
+footer a{color:var(--primary);text-decoration:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(230,126,34,.35)}50%{box-shadow:0 0 0 10px rgba(230,126,34,0)}}
+@media(max-width:380px){.categories-grid{grid-template-columns:1fr}.quick-tags{gap:4px}.tag{font-size:11px;padding:4px 10px}}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="header-top">
+      <h1>Gomi Dictionary</h1>
+      <div class="lang-switch">
+        <button class="lang-btn active" data-lang="zh">中</button>
+        <button class="lang-btn" data-lang="ja">日</button>
+        <button class="lang-btn" data-lang="ko">韩</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+    <p class="subtitle" id="subtitle">糸島市垃圾分类指南</p>
+  </header>
+
+  <section class="search-section">
+    <div class="city-selector">
+      <select id="city-select">
+        <option value="itoshima">🏠 糸島市 Itoshima</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <input type="text" id="search-input" placeholder="输入你要扔的东西…" autocomplete="off" enterkeyhint="search" inputmode="search">
+      <button id="clear-btn" class="hidden">✕</button>
+      <button id="mic-btn" title="语音输入">🎤</button>
+      <button id="search-btn" title="搜索">🔍</button>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+    <div class="quick-tags" id="quick-tags"></div>
+  </section>
+
+  <section id="history-section" class="history-section hidden">
+    <div class="history-header">
+      <span id="history-label">🕐 最近搜索</span>
+      <button id="history-clear-btn" class="history-clear">清除</button>
+    </div>
+    <div id="history-list"></div>
+  </section>
+
+  <section id="result-section" class="result-section hidden">
+    <div id="result-card" class="result-card"></div>
+  </section>
+
+  <section id="help-section" class="help-section">
+    <h2 id="help-title">📖 糸島市垃圾分类</h2>
+    <div class="categories-grid" id="categories-grid"></div>
+  </section>
+
+  <footer>
+    <p>数据来源：<a href="https://www.city.itoshima.lg.jp/" target="_blank">糸島市公式HP</a> · <span id="footer-text">非官方应用，仅供参考</span></p>
+  </footer>
+</div>
+
+<div id="speech-status" class="speech-status hidden">
+  <div id="speech-text">🎤 正在倾听…</div>
+  <div class="hint" id="speech-hint">说出垃圾名称</div>
+  <div class="speech-wave"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+
+<script>
+// ===== i18n =====
+const I18N={zh:{subtitle:"糸島市垃圾分类指南",search_placeholder:"输入你要扔的东西…",mic_title:"语音输入",search_title:"搜索",help_title:"📖 糸島市垃圾分类",footer_text:"非官方应用，仅供参考",no_result:"😕 没找到「{q}」，试试换个词",match_prefix:"找到 ",match_suffix:" 个结果",bag_type:"垃圾袋",how_to:"处理方法",ja_name:"日语",speak_hint:"说出垃圾名称",listening:"🎤 正在倾听…",not_supported:"❌ 此浏览器不支持语音输入",history_label:"🕐 最近搜索",history_clear:"清除",history_empty:"暂无搜索记录",cat_bags:"垃圾袋颜色",tap_to_search:"点击搜索",mic_fallback:"💡 也可用键盘麦克风输入",fallback_title:"没找到？按材质判断：",fallback_rules:"🔥 塑料·纸·布·皮革·橡胶 → 白袋（红字）|⛔ 金属·玻璃·陶瓷·小家电 → 黄袋|♻️ 饮料瓶罐·食品玻璃瓶 → 绿袋|📦 装不进袋子 → 粗大垃圾（需预约）|⚠️ 含充电电池 → 严禁入袋，送回收协力店",fallback_contact:"仍不确定：糸島市環境政策課 092-332-2068"},ja:{subtitle:"糸島市 ごみ分別辞典",search_placeholder:"捨てたいものを入力…",mic_title:"音声入力",search_title:"検索",help_title:"📖 糸島市 ごみ分別",footer_text:"公式アプリではありません。参考用です。",no_result:"😕 「{q}」に該当するものが見つかりません",match_prefix:"該当 ",match_suffix:" 件",bag_type:"ごみ袋",how_to:"出し方・注意点",ja_name:"日本語名",speak_hint:"ごみの名前を話してください",listening:"🎤 聞いています…",not_supported:"❌ 音声入力に対応していません",history_label:"🕐 最近の検索",history_clear:"削除",history_empty:"検索履歴はありません",cat_bags:"ごみ袋の色",tap_to_search:"タップして検索",mic_fallback:"💡 キーボードのマイクもご利用いただけます",fallback_title:"見つからない場合は素材で判断：",fallback_rules:"🔥 プラ・紙・布・革・ゴム → もえるごみ袋（白・赤文字）|⛔ 金属・ガラス・陶器・小型家電 → 黄色袋|♻️ 飲料びん・缶・PET → リサイクル袋（緑）|📦 袋に入らない → 粗大ごみ（要予約）|⚠️ 充電池内蔵 → 袋に入れず回収協力店へ",fallback_contact:"不明な場合：環境政策課 092-332-2068"},ko:{subtitle:"이토시마시 쓰레기 분류 가이드",search_placeholder:"버릴 물건을 입력하세요…",mic_title:"음성 입력",search_title:"검색",help_title:"📖 이토시마시 쓰레기 분류",footer_text:"공식 앱이 아닙니다. 참고용입니다.",no_result:"😕 「{q}」에 해당하는 항목이 없습니다",match_prefix:"",match_suffix:"개 결과",bag_type:"쓰레기봉투",how_to:"처리 방법",ja_name:"일본어",speak_hint:"물건 이름을 말해주세요",listening:"🎤 듣고 있습니다…",not_supported:"❌ 음성 입력을 지원하지 않는 브라우저입니다",history_label:"🕐 최근 검색",history_clear:"삭제",history_empty:"검색 기록이 없습니다",cat_bags:"봉투 색상",tap_to_search:"탭하여 검색",mic_fallback:"💡 키보드 마이크도 사용 가능합니다",fallback_title:"찾을 수 없으면 재질로 판단:",fallback_rules:"🔥 플라스틱·종이·천·가죽·고무 → 흰 봉투(빨간 글씨)|⛔ 금속·유리·도자기·소형가전 → 노란 봉투|♻️ 음료병·캔·식품 유리병 → 초록 봉투|📦 봉투에 안 들어가면 → 대형 폐기물(예약)|⚠️ 충전지 내장 → 봉투 금지, 회수 협력점으로",fallback_contact:"문의: 環境政策課 092-332-2068"},en:{subtitle:"Itoshima City Garbage Guide",search_placeholder:"What to throw away?",mic_title:"Voice input",search_title:"Search",help_title:"📖 Itoshima Garbage Categories",footer_text:"Not official. For reference only.",no_result:'😕 No results for 「{q}」',match_prefix:"",match_suffix:" result(s)",bag_type:"Bag",how_to:"How to dispose",ja_name:"Japanese",speak_hint:"Say the item name",listening:"🎤 Listening…",not_supported:"❌ Voice input not supported",history_label:"🕐 Recent",history_clear:"Clear",history_empty:"No search history",cat_bags:"Bag color",tap_to_search:"Tap to search",mic_fallback:"💡 You can also use keyboard mic",fallback_title:"Not found? Judge by material:",fallback_rules:"🔥 Plastic/paper/cloth/leather/rubber → White bag (red print)|⛔ Metal/glass/ceramic/small appliances → Yellow bag|♻️ Beverage bottles/cans, food glass jars → Green bag|📦 Doesn't fit in bag → Bulky waste (reserve)|⚠️ Rechargeable battery inside → Never in bags; take to collection stores",fallback_contact:"Still unsure: Environment Policy Div. 092-332-2068"}};let currentLang="zh";function t(key,vars){let v=I18N[currentLang]?.[key];if(v===undefined)v=I18N.zh?.[key]||key;if(vars)for(const[k,val]of Object.entries(vars))v=v.replace(`{${k}}`,val);return v}
+function setLang(lang){currentLang=lang;document.querySelectorAll("[data-i18n]").forEach(el=>{const key=el.dataset.i18n;if(key==="mic_title"||key==="search_title")el.title=t(key);else el.textContent=t(key)});document.getElementById("search-input").placeholder=t("search_placeholder");if(typeof renderCategories==="function")renderCategories();const card=document.getElementById("result-card");if(card&&card.dataset.lastSearch)performSearch(card.dataset.lastSearch);if(typeof renderHistory==="function")renderHistory();if(typeof renderQuickTags==="function")renderQuickTags();document.querySelectorAll(".lang-btn").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));const si=document.getElementById("search-input");if(si.value.trim()){setTimeout(()=>{const sid=document.getElementById("suggestions");if(sid){sid.classList.remove("show");renderSuggestions(getSuggestions(document.getElementById("city-select").value,si.value.trim()))}},50)}}
+
+// ===== Data =====
+const GOMI_DATA={itoshima:{name_zh:"糸島市",name_ja:"糸島市",name_en:"Itoshima City",name_ko:"이토시마시",categories:[{id:"moeru",name_ja:"もえるごみ袋",name_zh:"可燃垃圾（白色半透明袋・红字）",name_en:"Burnable (White bag, red print)",name_ko:"태울 수 있는 쓰레기 (흰색 반투명·빨간 글씨)",bag:"指定ごみ袋（白・赤文字）",bag_zh:"指定垃圾袋（白色半透明・红字）",bag_en:"White translucent bag (red print)",bag_ko:"지정 봉투 (흰색 반투명·빨간 글씨)",desc_zh:"厨房垃圾、纸类、衣物、塑料制品等",desc_en:"Kitchen waste, paper, clothes, plastics",desc_ko:"음식물 쓰레기, 종이, 의류, 플라스틱 제품 등",color:"#c0392b"},{id:"moenai",name_ja:"その他のもえないごみ袋",name_zh:"不可燃垃圾（黄色袋）",name_en:"Non-burnable (Yellow Bag)",name_ko:"태울 수 없는 쓰레기 (노란색)",bag:"指定ごみ袋（黄色）",bag_zh:"指定垃圾袋（黄色）",bag_en:"Designated bag (Yellow)",bag_ko:"지정 쓰레기봉투 (노란색)",desc_zh:"金属制品、玻璃、陶瓷、小型家电等",desc_en:"Metal, glass, ceramics, small appliances",desc_ko:"금속 제품, 유리, 도자기, 소형 가전 등",color:"#d4a017"},{id:"recycle",name_ja:"リサイクル袋",name_zh:"资源回收（绿色半透明袋）",name_en:"Recyclable (Green Bag)",name_ko:"재활용 (초록 반투명 봉투)",bag:"リサイクル袋（緑）",bag_zh:"资源回收袋（绿色半透明）",bag_en:"Green translucent recycling bag",bag_ko:"재활용 봉투 (초록 반투명)",desc_zh:"瓶、罐、PET塑料瓶等",desc_en:"Bottles, cans, PET bottles",desc_ko:"병, 캔, 페트병 등",color:"#3a7d4f"},{id:"sodai",name_ja:"粗大ごみ",name_zh:"大型垃圾",name_en:"Bulky Waste",name_ko:"대형 쓰레기",bag:"粗大ごみシール",bag_zh:"粗大垃圾贴纸（收费）",bag_en:"Bulky waste sticker (paid)",bag_ko:"대형 쓰레기 스티커 (유료)",desc_zh:"家具、家电等大件物品（需预约）",desc_en:"Furniture, large items (reservation needed)",desc_ko:"가구, 대형 가전 등 (예약 필요)",color:"#8e44ad"},{id:"not_collected",name_ja:"市で収集できません",name_zh:"市不收集（需特殊处理）",name_en:"Not collected by city",name_ko:"시에서 수거 불가",bag:"家電リサイクル法等対応",bag_zh:"家电回收法对应商品",bag_en:"Home Appliance Recycling Law",bag_ko:"가전 리사이클법 대상",desc_zh:"空调、电视、洗衣机等（需联系零售商）",desc_en:"AC, TV, washing machine (contact retailer)",desc_ko:"에어컨, TV, 세탁기 등 (판매점 문의)",color:"#636e72"},{id:"clean_center",name_ja:"クリーンセンターへ直接搬入",name_zh:"需直接运至清洁中心",name_en:"Deliver to Clean Center",name_ko:"클린센터 직접 반입",bag:"直接搬入（有料）",bag_zh:"自行运入（收费）",bag_en:"Self-delivery (paid)",bag_ko:"직접 반입 (유료)",desc_zh:"土、石等无法路边收集的物品",desc_en:"Soil, stones, items not collectable on curb",desc_ko:"흙, 돌 등 길가 수거 불가 품목",color:"#f39c12"}],items:[
+{name:"ペットボトル",zh:"塑料瓶",en:"PET bottle",ko:"페트병",cat:"recycle",note_ja:"キャップとラベルを外し、中を軽く洗ってからリサイクル袋へ",note_zh:"取下瓶盖和标签，简单清洗后放入资源回收袋",note_en:"Remove cap & label, rinse lightly, put in recycling bag",note_ko:"뚜껑과 라벨을 떼고 가볍게 씻은 후 재활용 봉투에"},
+{name:"ペットボトルのキャップ",zh:"塑料瓶盖",en:"PET bottle cap",ko:"페트병 뚜껑",cat:"moeru",note_ja:"プラスチック製のキャップはもえるごみ",note_zh:"塑料瓶盖属于可燃垃圾",note_en:"Plastic caps are burnable",note_ko:"플라스틱 뚜껑은 태울 수 있는 쓰레기"},
+{name:"ペットボトルのラベル",zh:"塑料瓶标签",en:"PET bottle label",ko:"페트병 라벨",cat:"moeru",note_ja:"プラスチック製のラベルはもえるごみ",note_zh:"塑料标签属于可燃垃圾",note_en:"Plastic labels are burnable",note_ko:"플라스틱 라벨은 태울 수 있는 쓰레기"},
+{name:"空き缶（飲料）",zh:"易拉罐（饮料）",en:"Can (beverage)",ko:"빈 캔 (음료)",cat:"recycle",note_ja:"中身を出し切り、軽く洗ってリサイクル袋へ",note_zh:"倒空内容物，简单清洗后放入资源回收袋",note_en:"Empty and rinse lightly, put in recycling bag",note_ko:"내용물 비우고 가볍게 씻어 재활용 봉투에"},
+{name:"空き缶（飲料以外）",zh:"金属罐（非饮料）",en:"Can (non-beverage)",ko:"빈 캔 (음료 외)",cat:"moenai",note_ja:"飲料缶以外はその他のもえないごみ",note_zh:"非饮料罐属于不可燃垃圾",note_en:"Non-beverage cans are non-burnable",note_ko:"음료 이외의 캔은 태울 수 없는 쓰레기"},
+{name:"空きびん（一升瓶）",zh:"玻璃瓶（一升瓶）",en:"Glass bottle (1L+)",ko:"빈 병 (1L)",cat:"recycle",note_ja:"できれば販売店に返却。リサイクル袋でも可",note_zh:"尽量退回商店，也可放入资源回收袋",note_en:"Return to store if possible, or put in recycling bag",note_ko:"가능하면 판매점에 반환. 재활용 봉투도 가능"},
+{name:"空きびん（栄養ドリンク）",zh:"玻璃瓶（饮料）",en:"Glass bottle (drink)",ko:"빈 병 (음료)",cat:"recycle",note_ja:"中身を出し切り、軽く洗ってリサイクル袋へ",note_zh:"倒空内容物，简单清洗后放入资源回收袋",note_en:"Empty and rinse, put in recycling bag",note_ko:"내용물 비우고 가볍게 씻어 재활용 봉투에"},
+{name:"油のびん",zh:"油瓶（玻璃）",en:"Oil bottle (glass)",ko:"기름병 (유리)",cat:"moenai",note_ja:"油の入っていたびんはその他のもえないごみ",note_zh:"装油的玻璃瓶属于不可燃垃圾",note_en:"Oil glass bottles are non-burnable",note_ko:"기름이 들어있던 병은 태울 수 없는 쓰레기"},
+{name:"油のボトル（プラスチック）",zh:"油瓶（塑料）",en:"Oil bottle (plastic)",ko:"기름병 (플라스틱)",cat:"moeru",note_ja:"プラスチック製の油ボトルはもえるごみ",note_zh:"塑料油瓶属于可燃垃圾",note_en:"Plastic oil bottles are burnable",note_ko:"플라스틱 기름병은 태울 수 있는 쓰레기"},
+{name:"アルミ缶",zh:"铝罐",en:"Aluminum can",ko:"알루미늄 캔",cat:"recycle",note_ja:"飲料用アルミ缶はリサイクル袋。汚れが落ちないものはその他のもえないごみ",note_zh:"饮料铝罐放入资源回收袋，洗不掉的放入不可燃",note_en:"Beverage cans in recycling; dirty ones in non-burnable",note_ko:"음료용 알루미늄 캔은 재활용. 더러운 것은 태울 수 없는 쓰레기"},
+{name:"アルミ箔",zh:"铝箔",en:"Aluminum foil",ko:"알루미늄 호일",cat:"moeru",note_ja:"アルミ箔はもえるごみ",note_zh:"铝箔属于可燃垃圾",note_en:"Aluminum foil is burnable",note_ko:"알루미늄 호일은 태울 수 있는 쓰레기"},
+{name:"アルミサッシ",zh:"铝合金门窗",en:"Aluminum sash",ko:"알루미늄 샤시",cat:"sodai",note_ja:"粗大ごみ。袋に入りきるものはその他のもえないごみ",note_zh:"大型垃圾。能装进袋的属于不可燃",note_en:"Bulky waste. If fits in bag = non-burnable"},
+{name:"ICレコーダー",zh:"录音笔",en:"Voice recorder",ko:"IC 레코더",cat:"moenai",note_ja:"その他のもえないごみ袋",note_zh:"放入不可燃垃圾袋",note_en:"Put in non-burnable bag",note_ko:"태울 수 없는 쓰레기"},
+{name:"アイロン",zh:"熨斗",en:"Iron (clothes)",ko:"다리미",cat:"moenai",note_ja:"その他のもえないごみ。袋に入りきれないものは粗大ごみ",note_zh:"不可燃垃圾。装不进袋的算大型垃圾",note_en:"Non-burnable. Oversized = bulky waste",note_ko:"태울 수 없는 쓰레기. 봉투에 안 들어가면 대형 쓰레기"},
+{name:"アダプター",zh:"电源适配器",en:"Power adapter",ko:"어댑터",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable",note_ko:"태울 수 없는 쓰레기"},
+{name:"厚紙",zh:"厚纸板",en:"Cardboard",ko:"두꺼운 종이",cat:"moeru",note_ja:"もえるごみ。紙資源として集団回収にも出せます",note_zh:"可燃垃圾。也可作为纸资源回收",note_en:"Burnable. Can also be paper-recycled",note_ko:"태울 수 있는 쓰레기. 종이 자원으로도 회수 가능"},
+{name:"油のついた紙",zh:"油污纸张",en:"Greasy paper",ko:"기름 묻은 종이",cat:"moeru",note_ja:"油のついた紙はもえるごみ",note_zh:"油污纸张属可燃垃圾",note_en:"Greasy paper is burnable"},
+{name:"衣類",zh:"衣物",en:"Clothes",ko:"의류",cat:"moeru",note_ja:"衣類はもえるごみ",note_zh:"衣物属于可燃垃圾",note_en:"Clothes are burnable",note_ko:"의류는 태울 수 있는 쓰레기"},
+{name:"イヤホン",zh:"耳机",en:"Earphones",ko:"이어폰",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable",note_ko:"태울 수 없는 쓰레기"},
+{name:"インクカートリッジ",zh:"墨盒",en:"Ink cartridge",ko:"잉크 카트리지",cat:"moeru",note_ja:"もえるごみ。郵便局・市役所の回収箱でも可",note_zh:"可燃垃圾。也可投入邮局/市政府的回收箱",note_en:"Burnable. Can also use post office/city hall collection"},
+{name:"植木鉢（陶器）",zh:"花盆（陶瓷）",en:"Flower pot (ceramic)",ko:"화분 (도자기)",cat:"moenai",note_ja:"その他のもえないごみ。中身の土は出してください",note_zh:"不可燃垃圾。请倒出土",note_en:"Non-burnable. Remove soil first"},
+{name:"植木鉢（プラスチック）",zh:"花盆（塑料）",en:"Flower pot (plastic)",ko:"화분 (플라스틱)",cat:"moeru",note_ja:"プラスチック製はもえるごみ",note_zh:"塑料花盆属于可燃垃圾",note_en:"Plastic pots are burnable"},
+{name:"枝",zh:"树枝",en:"Tree branches",ko:"나뭇가지",cat:"moeru",note_ja:"長さ70cm以下、直径15cm以下に切ってもえるごみ",note_zh:"切成70cm以下、直径15cm以下后放入可燃垃圾",note_en:"Cut to <70cm length & <15cm diameter, then burnable"},
+{name:"LED電球",zh:"LED灯泡",en:"LED bulb",ko:"LED 전구",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"エアコン",zh:"空调",en:"Air conditioner",ko:"에어컨",cat:"not_collected",note_ja:"家電リサイクル法対象。販売店に相談",note_zh:"属于家电回收法对象。请咨询销售商",note_en:"Covered by Home Appliance Recycling Law. Contact retailer",note_ko:"가전 리사이클법 대상. 판매점 문의"},
+{name:"エアコン室外機",zh:"空调外机",en:"AC outdoor unit",ko:"에어컨 실외기",cat:"not_collected",note_ja:"家電リサイクル法対象",note_zh:"家电回收法对象",note_en:"Covered by Home Appliance Recycling Law"},
+{name:"おむつ",zh:"尿布",en:"Diapers",ko:"기저귀",cat:"moeru",note_ja:"汚物はトイレに流してもえるごみ",note_zh:"冲掉污物后放入可燃垃圾",note_en:"Flush waste, then burnable"},
+{name:"おもちゃ（プラスチック）",zh:"玩具（塑料）",en:"Toys (plastic)",ko:"장난감 (플라스틱)",cat:"moeru",note_ja:"プラスチック・木製のおもちゃはもえるごみ",note_zh:"塑料/木制玩具属于可燃垃圾",note_en:"Plastic/wooden toys are burnable"},
+{name:"おもちゃ（金属製）",zh:"玩具（金属）",en:"Toys (metal)",ko:"장난감 (금속)",cat:"moenai",note_ja:"金属製のおもちゃはその他のもえないごみ",note_zh:"金属玩具属于不可燃垃圾",note_en:"Metal toys are non-burnable"},
+{name:"おもちゃ（電動）",zh:"玩具（电动）",en:"Toys (electronic)",ko:"장난감 (전동)",cat:"moenai",note_ja:"電動のおもちゃはその他のもえないごみ",note_zh:"电动玩具属于不可燃垃圾",note_en:"Electronic toys are non-burnable"},
+{name:"オーブントースター",zh:"烤面包机",en:"Toaster",ko:"오븐 토스터",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"オーブンレンジ",zh:"微波炉",en:"Microwave oven",ko:"전자레인지",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"折りたたみチェア",zh:"折叠椅",en:"Folding chair",ko:"접이식 의자",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"ガスコンロ",zh:"燃气灶",en:"Gas stove",ko:"가스 렌지",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"ガスレンジ",zh:"燃气炉",en:"Gas range",ko:"가스 오븐",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"カセットコンロ",zh:"卡式炉",en:"Cassette stove",ko:"카세트 버너",cat:"moenai",note_ja:"ボンベは中身を使い切ってからその他のもえないごみ",note_zh:"燃气罐用完内容物后放入不可燃垃圾",note_en:"Empty gas cartridge fully, then non-burnable"},
+{name:"カップ麺容器",zh:"杯面容器",en:"Cup noodle container",ko:"컵라면 용기",cat:"moeru",note_ja:"汚れを落としてもえるごみ",note_zh:"清洗后放入可燃垃圾",note_en:"Clean and put in burnable",note_ko:"씻어서 태울 수 있는 쓰레기"},
+{name:"かなづち",zh:"锤子",en:"Hammer",ko:"망치",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+
+{name:"カメラ",zh:"相机",en:"Camera",ko:"카메라",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"乾電池",zh:"干电池",en:"Dry battery",ko:"건전지",cat:"moenai",note_ja:"その他のもえないごみ。端子をテープで絶縁",note_zh:"不可燃垃圾。用胶带绝缘电极",note_en:"Non-burnable. Tape the terminals",note_ko:"태울 수 없는 쓰레기. 단자를 테이프로 절연"},
+{name:"缶切り",zh:"开罐器",en:"Can opener",ko:"캔 따개",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"牛乳パック",zh:"牛奶盒",en:"Milk carton",ko:"우유 팩",cat:"moeru",note_ja:"もえるごみ。開いて乾かしてから",note_zh:"可燃垃圾。打开晾干后丢弃",note_en:"Burnable. Open and dry first",note_ko:"태울 수 있는 쓰레기. 펼쳐서 말린 후"},
+{name:"薬",zh:"药品",en:"Medicine",ko:"약",cat:"moeru",note_ja:"もえるごみ。薬局で引き取り可能な場合も",note_zh:"可燃垃圾。部分药店可回收",note_en:"Burnable. Some pharmacies accept returns",note_ko:"태울 수 있는 쓰레기. 일부 약국에서 회수 가능"},
+{name:"草",zh:"杂草",en:"Weeds/grass",ko:"풀/잡초",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"靴",zh:"鞋子",en:"Shoes",ko:"신발",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"태울 수 있는 쓰레기"},
+{name:"コップ（ガラス）",zh:"玻璃杯",en:"Glass cup",ko:"컵 (유리)",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"コップ（プラスチック）",zh:"塑料杯",en:"Plastic cup",ko:"컵 (플라스틱)",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"コップ（陶器）",zh:"陶瓷杯",en:"Ceramic cup",ko:"컵 (도자기)",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"コピー機",zh:"复印机",en:"Copier",ko:"복사기",cat:"moenai",note_ja:"その他のもえないごみ。袋に入りきれないものは粗大ごみ",note_zh:"不可燃垃圾。装不进袋的算大型垃圾",note_en:"Non-burnable. Oversized = bulky waste"},
+{name:"再生紙",zh:"再生纸",en:"Recycled paper",ko:"재생지",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"座布団",zh:"坐垫",en:"Cushion",ko:"방석",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"CD/DVD",zh:"光盘",en:"CD/DVD",ko:"CD/DVD",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"シャンプーボトル",zh:"洗发水瓶",en:"Shampoo bottle",ko:"샴푸 병",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"食器（プラスチック）",zh:"餐具（塑料）",en:"Tableware (plastic)",ko:"식기 (플라스틱)",cat:"moeru",note_ja:"プラスチック製食器はもえるごみ",note_zh:"塑料餐具属于可燃垃圾",note_en:"Plastic tableware is burnable"},
+{name:"食器（陶器）",zh:"餐具（陶瓷）",en:"Tableware (ceramic)",ko:"식기 (도자기)",cat:"moenai",note_ja:"陶器の食器はその他のもえないごみ",note_zh:"陶瓷餐具属于不可燃垃圾",note_en:"Ceramic tableware is non-burnable"},
+{name:"食品トレイ",zh:"食品托盘",en:"Food tray",ko:"식품 트레이",cat:"moeru",note_ja:"軽く洗ってもえるごみ",note_zh:"简单清洗后放入可燃垃圾",note_en:"Rinse lightly, then burnable",note_ko:"가볍게 씻어 태울 수 있는 쓰레기"},
+{name:"新聞紙",zh:"报纸",en:"Newspaper",ko:"신문지",cat:"moeru",note_ja:"もえるごみ。紙資源として集団回収にも",note_zh:"可燃垃圾。也可作为纸资源回收",note_en:"Burnable. Can also be paper-recycled",note_ko:"태울 수 있는 쓰레기. 종이 자원 회수도 가능"},
+{name:"炊飯器",zh:"电饭锅",en:"Rice cooker",ko:"밥솥",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable",note_ko:"태울 수 없는 쓰레기"},
+{name:"ステンレスボトル",zh:"不锈钢保温瓶",en:"Stainless bottle",ko:"스테인리스 보틀",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"スマートフォン",zh:"智能手机",en:"Smartphone",ko:"스마트폰",cat:"moenai",note_ja:"内蔵電池のため回収協力店（家電量販店等）推奨。袋に出す場合は電池を必ず外す",note_zh:"内置电池，建议送回收协力店；放袋须先取出电池",note_en:"Built-in battery: collection stores recommended; remove battery if bagging",note_ko:"내장 배터리: 회수 협력점 권장"},
+{name:"石鹸",zh:"肥皂",en:"Soap",ko:"비누",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"태울 수 있는 쓰레기"},
+{name:"体温計（水銀）",zh:"体温计（水银）",en:"Mercury thermometer",ko:"체온계 (수은)",cat:"moenai",note_ja:"その他のもえないごみ。割れた場合は注意",note_zh:"不可燃垃圾。破碎时请小心处理",note_en:"Non-burnable. Handle with care if broken"},
+{name:"体温計（電子）",zh:"体温计（电子）",en:"Digital thermometer",ko:"체온계 (전자)",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"タイヤ",zh:"轮胎",en:"Tire",ko:"타이어",cat:"not_collected",note_ja:"販売店にご相談ください",note_zh:"请咨询销售商",note_en:"Contact the retailer"},
+{name:"たたみ",zh:"榻榻米",en:"Tatami mat",ko:"다다미",cat:"sodai",note_ja:"粗大ごみ",note_zh:"大型垃圾",note_en:"Bulky waste"},
+{name:"茶碗",zh:"饭碗（陶瓷）",en:"Rice bowl (ceramic)",ko:"밥그릇 (도자기)",cat:"moenai",note_ja:"陶器はその他のもえないごみ",note_zh:"陶瓷属于不可燃垃圾",note_en:"Ceramic = non-burnable"},
+{name:"チラシ",zh:"传单",en:"Flyers",ko:"전단지",cat:"moeru",note_ja:"もえるごみ。紙資源回収にも",note_zh:"可燃垃圾。也可作为纸资源回收",note_en:"Burnable. Can also be paper-recycled"},
+{name:"机",zh:"桌子",en:"Desk/table",ko:"책상",cat:"sodai",note_ja:"粗大ごみ",note_zh:"大型垃圾（需预约）",note_en:"Bulky waste (reservation needed)"},
+{name:"ティッシュペーパー",zh:"纸巾",en:"Tissue paper",ko:"티슈",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"テレビ",zh:"电视机",en:"Television",ko:"텔레비전",cat:"not_collected",note_ja:"家電リサイクル法対象",note_zh:"家电回收法对象商品",note_en:"Covered by Home Appliance Recycling Law",note_ko:"가전 리사이클법 대상. 판매점 문의"},
+{name:"電気カーペット",zh:"电热毯",en:"Electric carpet",ko:"전기 카펫",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"電気ケトル",zh:"电热水壶",en:"Electric kettle",ko:"전기 주전자",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"電気スタンド",zh:"台灯",en:"Desk lamp",ko:"스탠드 조명",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"電話機",zh:"电话机",en:"Telephone",ko:"전화기",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"トイレットペーパー",zh:"卫生纸",en:"Toilet paper",ko:"화장지",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"ドライヤー",zh:"吹风机",en:"Hair dryer",ko:"헤어 드라이어",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"トレイ（プラスチック）",zh:"塑料托盘",en:"Plastic tray",ko:"트레이 (플라스틱)",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"鍋",zh:"锅",en:"Pot/pan",ko:"냄비",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"ナイフ",zh:"刀",en:"Knife",ko:"칼",cat:"moenai",note_ja:"その他のもえないごみ。新聞紙に包む",note_zh:"不可燃垃圾。用报纸包好",note_en:"Non-burnable. Wrap in newspaper"},
+{name:"布団",zh:"被子",en:"Futon/bedding",ko:"이불/요",cat:"sodai",note_ja:"粗大ごみ",note_zh:"大型垃圾",note_en:"Bulky waste"},
+{name:"ノート",zh:"笔记本",en:"Notebook",ko:"노트",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"パソコン",zh:"电脑",en:"Computer",ko:"컴퓨터",cat:"not_collected",note_ja:"資源有効利用促進法対象。メーカーに回収依頼",note_zh:"资源有效利用促进法对象。联系制造商回收",note_en:"Covered by Resource Efficiency Law. Contact maker",note_ko:"자원 유효 이용 촉진법 대상. 제조사에 회수 의뢰"},
+{name:"歯ブラシ",zh:"牙刷",en:"Toothbrush",ko:"칫솔",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"태울 수 있는 쓰레기"},
+{name:"灰",zh:"灰烬",en:"Ash",ko:"재",cat:"moeru",note_ja:"水をかけてからもえるごみ",note_zh:"浇水后放入可燃垃圾",note_en:"Douse with water, then burnable",note_ko:"물을 뿌린 후 태울 수 있는 쓰레기"},
+{name:"ハンガー（プラスチック）",zh:"衣架（塑料）",en:"Hanger (plastic)",ko:"옷걸이 (플라스틱)",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"ハンガー（金属）",zh:"衣架（金属）",en:"Hanger (metal)",ko:"옷걸이 (금속)",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"ビニール袋",zh:"塑料袋",en:"Plastic bag",ko:"비닐봉투",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"태울 수 있는 쓰레기"},
+{name:"ひも",zh:"绳子",en:"String/rope",ko:"끈",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"プリンター",zh:"打印机",en:"Printer",ko:"프린터",cat:"moenai",note_ja:"その他のもえないごみ。メーカー回収も",note_zh:"不可燃垃圾。也可联系制造商回收",note_en:"Non-burnable. Manufacturer may accept"},
+
+{name:"プラスチック容器",zh:"塑料容器",en:"Plastic container",ko:"플라스틱 용기",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"태울 수 있는 쓰레기"},
+{name:"弁当箱（プラスチック）",zh:"便当盒（塑料）",en:"Lunch box (plastic)",ko:"도시락 (플라스틱)",cat:"moeru",note_ja:"軽く洗ってもえるごみ",note_zh:"简单清洗后放入可燃垃圾",note_en:"Rinse lightly, then burnable",note_ko:"가볍게 씻어 태울 수 있는 쓰레기"},
+
+{name:"マウス（パソコン）",zh:"鼠标",en:"Mouse (computer)",ko:"마우스",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"マッチ",zh:"火柴",en:"Matches",ko:"성냥",cat:"moeru",note_ja:"水に浸してからもえるごみ",note_zh:"浸水后放入可燃垃圾",note_en:"Soak in water, then burnable",note_ko:"물에 적신 후 태울 수 있는 쓰레기"},
+{name:"マットレス",zh:"床垫",en:"Mattress",ko:"매트리스",cat:"sodai",note_ja:"粗大ごみ",note_zh:"大型垃圾",note_en:"Bulky waste"},
+{name:"魔法瓶",zh:"保温瓶",en:"Thermos",ko:"보온병",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"マンガ本",zh:"漫画书",en:"Manga/comics",ko:"만화책",cat:"moeru",note_ja:"もえるごみ。紙資源回収にも",note_zh:"可燃垃圾。也可作为纸资源回收",note_en:"Burnable. Can also be paper-recycled"},
+{name:"ミキサー",zh:"搅拌机",en:"Blender",ko:"믹서기",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"虫眼鏡",zh:"放大镜",en:"Magnifying glass",ko:"돋보기",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"毛布",zh:"毛毯",en:"Blanket",ko:"담요",cat:"moeru",note_ja:"もえるごみ。袋に入りきれないものは粗大ごみ",note_zh:"可燃垃圾。装不进袋的算大型垃圾",note_en:"Burnable. Oversized = bulky waste"},
+{name:"野菜くず",zh:"厨余菜叶",en:"Vegetable scraps",ko:"야채 찌꺼기",cat:"moeru",note_ja:"水を切ってもえるごみ",note_zh:"沥干水分后放入可燃垃圾",note_en:"Drain water, then burnable",note_ko:"물기를 빼고 태울 수 있는 쓰레기"},
+{name:"やかん",zh:"水壶",en:"Kettle (metal)",ko:"주전자",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"ライター",zh:"打火机",en:"Lighter",ko:"라이터",cat:"moenai",note_ja:"中身を使い切ってからその他のもえないごみ",note_zh:"用完燃料后放入不可燃垃圾",note_en:"Empty fuel, then non-burnable"},
+{name:"ラジオ",zh:"收音机",en:"Radio",ko:"라디오",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"ラップ",zh:"保鲜膜",en:"Plastic wrap",ko:"랩",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"태울 수 있는 쓰레기"},
+{name:"リモコン",zh:"遥控器",en:"Remote control",ko:"리모컨",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"レジ袋",zh:"塑料袋（购物袋）",en:"Shopping plastic bag",ko:"비닐봉투 (쇼핑)",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"태울 수 있는 쓰레기"},
+{name:"レトルトパウチ",zh:"软包装袋",en:"Retort pouch",ko:"레토르트 파우치",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"冷蔵庫",zh:"冰箱",en:"Refrigerator",ko:"냉장고",cat:"not_collected",note_ja:"家電リサイクル法対象。販売店に相談",note_zh:"家电回收法对象。请咨询销售商",note_en:"Covered by Home Appliance Recycling Law",note_ko:"가전 리사이클법 대상. 판매점 문의"},
+{name:"冷凍庫",zh:"冰柜",en:"Freezer",ko:"냉동고",cat:"not_collected",note_ja:"家電リサイクル法対象",note_zh:"家电回收法对象",note_en:"Covered by Home Appliance Recycling Law"},
+{name:"レンジ",zh:"炉灶/微波炉",en:"Stove/Microwave",ko:"전자레인지",cat:"moenai",note_ja:"その他のもえないごみ",note_zh:"不可燃垃圾",note_en:"Non-burnable"},
+{name:"ロープ",zh:"绳索",en:"Rope",ko:"로프",cat:"moeru",note_ja:"長さ70cm以下に切ってもえるごみ",note_zh:"切成70cm以下后放入可燃垃圾",note_en:"Cut to <70cm, then burnable"},
+{name:"ワイシャツ",zh:"衬衫",en:"Dress shirt",ko:"와이셔츠",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable"},
+{name:"ワインびん",zh:"葡萄酒瓶",en:"Wine bottle",ko:"와인 병",cat:"recycle",note_ja:"リサイクル袋へ",note_zh:"放入资源回收袋",note_en:"Put in recycling bag"},
+{name:"割りばし",zh:"一次性筷子",en:"Disposable chopsticks",ko:"일회용 젓가락",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"태울 수 있는 쓰레기"},
+{name:"綿棒",zh:"棉棒",en:"Cotton swab",ko:"면봉",cat:"moeru",note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"태울 수 있는 쓰레기"},
+{name:"生ごみ",zh:"厨余垃圾",en:"Food waste",ko:"음식물 쓰레기",cat:"moeru",alias:["なまごみ","剩饭","剩菜","厨房垃圾","food scraps"],note_ja:"水気をよく切って",note_zh:"沥干水分后放入白袋",note_en:"Drain water well",note_ko:"물기를 잘 빼서"},
+{name:"弁当容器",zh:"便当盒/外卖盒",en:"Bento container",ko:"도시락 용기",cat:"moeru",alias:["べんとう","外卖盒","饭盒","takeout box"],note_ja:"軽く洗ってもえるごみ",note_zh:"简单冲洗后可燃",note_en:"Rinse lightly, burnable",note_ko:"가볍게 씻어 가연"},
+{name:"お菓子の袋",zh:"零食包装袋",en:"Snack wrapper",ko:"과자 봉지",cat:"moeru",alias:["おかし","薯片袋","糖纸"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"マスク",zh:"口罩",en:"Face mask",ko:"마스크",cat:"moeru",alias:["ますく","使い捨てマスク"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"ウェットティッシュ",zh:"湿巾",en:"Wet wipes",ko:"물티슈",cat:"moeru",alias:["湿纸巾"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"生理用品",zh:"卫生巾",en:"Sanitary products",ko:"생리대",cat:"moeru",alias:["ナプキン","卫生棉"],note_ja:"紙に包んでもえるごみ",note_zh:"用纸包好放可燃",note_en:"Wrap in paper, burnable",note_ko:"종이에 싸서 가연"},
+{name:"使い捨てカイロ",zh:"暖宝宝",en:"Disposable heat pack",ko:"핫팩",cat:"moeru",alias:["かいろ","暖贴"],note_ja:"冷めてからもえるごみ",note_zh:"冷却后放可燃",note_en:"Cool down first, burnable",note_ko:"식힌 후 가연"},
+{name:"化粧品容器（プラ）",zh:"化妆品塑料瓶",en:"Cosmetic container (plastic)",ko:"화장품 용기(플라스틱)",cat:"moeru",alias:["けしょうひん","护肤品瓶","乳液瓶"],note_ja:"中身を使い切ってもえるごみ",note_zh:"用完内容物后可燃",note_en:"Empty first, burnable",note_ko:"내용물 비우고 가연"},
+{name:"歯磨き粉チューブ",zh:"牙膏皮",en:"Toothpaste tube",ko:"치약 튜브",cat:"moeru",alias:["はみがき","牙膏管"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"コンタクトレンズ",zh:"隐形眼镜",en:"Contact lenses",ko:"콘택트렌즈",cat:"moeru",alias:["こんたくと","美瞳"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"ストロー",zh:"吸管",en:"Straw",ko:"빨대",cat:"moeru",alias:["すとろー"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"スポンジ",zh:"海绵/百洁布",en:"Sponge",ko:"스펀지",cat:"moeru",alias:["洗碗海绵"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"タオル",zh:"毛巾",en:"Towel",ko:"수건",cat:"moeru",alias:["たおる","バスタオル","浴巾"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"ぬいぐるみ",zh:"毛绒玩具",en:"Stuffed toy",ko:"인형",cat:"moeru",alias:["玩偶","公仔"],note_ja:"もえるごみ（大型は粗大）",note_zh:"可燃（特大件按粗大垃圾）",note_en:"Burnable (large: bulky)",note_ko:"가연(대형은 대형폐기물)"},
+{name:"靴下・下着",zh:"袜子/内衣",en:"Socks/underwear",ko:"양말/속옷",cat:"moeru",alias:["くつした","したぎ","内裤"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"保冷剤",zh:"冰袋/保冷剂",en:"Ice pack",ko:"아이스팩",cat:"moeru",alias:["ほれいざい"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"乾燥剤",zh:"干燥剂",en:"Desiccant",ko:"건조제",cat:"moeru",alias:["かんそうざい","防潮剂"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"猫砂",zh:"猫砂",en:"Cat litter",ko:"고양이 모래",cat:"moeru",alias:["ねこすな","ペットシート"],note_ja:"紙・木製はもえるごみ。鉱物系は市に確認",note_zh:"纸/木质放可燃，矿物砂请咨询市政",note_en:"Paper/wood type burnable; mineral type ask city",note_ko:"종이/목재는 가연, 광물계는 문의"},
+{name:"食用油",zh:"食用油",en:"Cooking oil",ko:"식용유",cat:"moeru",alias:["廃油","地沟油","油"],note_ja:"紙に染み込ませるか凝固剤で固めてもえるごみ",note_zh:"用纸吸附或凝固剂固化后可燃",note_en:"Absorb with paper or solidify, burnable",note_ko:"응고시켜 가연"},
+{name:"卵の殻・貝殻",zh:"蛋壳/贝壳",en:"Eggshell/seashell",ko:"달걀·조개 껍데기",cat:"moeru",alias:["たまご","かいがら"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"ゴム手袋",zh:"橡胶手套",en:"Rubber gloves",ko:"고무장갑",cat:"moeru",alias:["てぶくろ","一次性手套"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"ラップの芯",zh:"保鲜膜芯/纸芯",en:"Wrap core tube",ko:"랩 심지",cat:"moeru",alias:["トイレットペーパーの芯","纸筒"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"タバコの吸い殻",zh:"烟头",en:"Cigarette butts",ko:"담배꽁초",cat:"moeru",alias:["たばこ","烟蒂"],note_ja:"水で完全に消火してから",note_zh:"完全熄灭后放可燃",note_en:"Extinguish completely first",note_ko:"완전히 끈 후"},
+{name:"除湿剤",zh:"除湿盒",en:"Dehumidifier box",ko:"제습제",cat:"moeru",alias:["じょしつざい","除湿桶"],note_ja:"中の水を捨てて容器はもえるごみ",note_zh:"倒掉积水后容器放可燃",note_en:"Empty water, container burnable",note_ko:"물 버리고 용기 가연"},
+{name:"ヘアブラシ",zh:"梳子",en:"Hairbrush",ko:"빗",cat:"moeru",alias:["くし","梳子"],note_ja:"プラ製はもえるごみ、金属製はもえないごみ",note_zh:"塑料放可燃，金属放不可燃",note_en:"Plastic burnable, metal non-burnable",note_ko:"플라스틱 가연, 금속 불연"},
+{name:"クッション",zh:"靠垫/抱枕",en:"Cushion",ko:"쿠션",cat:"moeru",alias:["枕","まくら","枕头"],note_ja:"袋に入る大きさならもえるごみ、入らなければ粗大",note_zh:"能装进袋子放可燃，装不下按粗大",note_en:"Fits in bag: burnable; else bulky",note_ko:"봉투에 들어가면 가연"},
+{name:"カーテン",zh:"窗帘",en:"Curtain",ko:"커튼",cat:"moeru",alias:["かーてん"],note_ja:"金具を外してもえるごみ",note_zh:"拆除金属挂钩后可燃",note_en:"Remove metal hooks, burnable",note_ko:"금속 제거 후 가연"},
+{name:"かばん・リュック",zh:"包/背包",en:"Bag/backpack",ko:"가방",cat:"moeru",alias:["バッグ","书包","双肩包"],note_ja:"布・革製はもえるごみ。金具が多いものはもえないごみ",note_zh:"布/皮质放可燃，金属件多的放不可燃",note_en:"Fabric/leather burnable; heavy metal parts non-burnable",note_ko:"천/가죽 가연"},
+{name:"財布",zh:"钱包",en:"Wallet",ko:"지갑",cat:"moeru",alias:["さいふ"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"プチプチ（緩衝材）",zh:"气泡膜",en:"Bubble wrap",ko:"뽁뽁이",cat:"moeru",alias:["エアキャップ","快递泡沫","缓冲材"],note_ja:"もえるごみ",note_zh:"可燃垃圾",note_en:"Burnable",note_ko:"가연"},
+{name:"モバイルバッテリー",zh:"充电宝",en:"Power bank",ko:"보조배터리",cat:"not_collected",alias:["充電器","じゅうでんき","移动电源"],note_ja:"⚠️指定袋に入れないで！発火の危険。回収協力店（家電量販店等）へ",note_zh:"⚠️严禁放入任何指定袋（起火危险）！送电器店等回收协力店",note_en:"⚠️Never put in bags (fire risk)! Take to collection stores",note_ko:"⚠️봉투 금지(화재 위험). 회수 협력점으로"},
+{name:"リチウムイオン電池",zh:"锂电池",en:"Lithium-ion battery",ko:"리튬이온 전지",cat:"not_collected",alias:["充電池","じゅうでんち","锂离子电池"],note_ja:"⚠️指定袋に入れないで！回収協力店へ",note_zh:"⚠️严禁放入指定袋！送回收协力店",note_en:"⚠️Never put in bags! Collection stores",note_ko:"⚠️봉투 금지! 회수 협력점으로"},
+{name:"ボタン電池",zh:"纽扣电池",en:"Button battery",ko:"버튼 전지",cat:"not_collected",alias:["コイン電池","电子表电池"],note_ja:"回収協力店の回収缶へ",note_zh:"送回收协力店回收罐",note_en:"Collection can at stores",note_ko:"회수 협력점으로"},
+{name:"蛍光灯",zh:"荧光灯管",en:"Fluorescent lamp",ko:"형광등",cat:"moenai",alias:["けいこうとう","灯管"],note_ja:"割れないよう購入時の箱等に入れてもえないごみ",note_zh:"装入原包装防碎，放不可燃",note_en:"Protect from breaking, non-burnable",note_ko:"깨지지 않게 불연"},
+{name:"電球",zh:"白炽灯泡",en:"Light bulb",ko:"전구",cat:"moenai",alias:["でんきゅう","灯泡"],note_ja:"紙に包んでもえないごみ",note_zh:"纸包好放不可燃",note_en:"Wrap in paper, non-burnable",note_ko:"종이에 싸서 불연"},
+{name:"スプレー缶",zh:"喷雾罐",en:"Spray can",ko:"스프레이 캔",cat:"moenai",alias:["エアゾール","杀虫剂罐","发胶"],note_ja:"中身を使い切って（穴あけ不要）もえないごみ",note_zh:"用完内容物（无需打孔）放不可燃",note_en:"Empty completely (no puncture), non-burnable",note_ko:"다 쓰고 불연"},
+{name:"カセットボンベ",zh:"卡式炉气罐",en:"Gas cartridge",ko:"부탄가스",cat:"moenai",alias:["ガス缶","瓦斯罐"],note_ja:"中身を使い切ってもえないごみ",note_zh:"用完放不可燃",note_en:"Empty first, non-burnable",note_ko:"다 쓰고 불연"},
+{name:"包丁",zh:"菜刀",en:"Kitchen knife",ko:"식칼",cat:"moenai",alias:["ほうちょう","刀"],note_ja:"刃を紙等で包み「キケン」と表示",note_zh:"刀刃用纸包好并标注「キケン」",note_en:"Wrap blade, label danger",note_ko:"날 감싸고 위험 표시"},
+{name:"カミソリ",zh:"剃须刀/刮刀",en:"Razor",ko:"면도기",cat:"moenai",alias:["剃刀","刮胡刀"],note_ja:"刃物は紙に包んでもえないごみ",note_zh:"包好放不可燃",note_en:"Wrap, non-burnable",note_ko:"싸서 불연"},
+{name:"はさみ",zh:"剪刀",en:"Scissors",ko:"가위",cat:"moenai",alias:["ハサミ","剪子"],note_ja:"もえないごみ",note_zh:"不可燃",note_en:"Non-burnable",note_ko:"불연"},
+{name:"フライパン",zh:"平底锅",en:"Frying pan",ko:"프라이팬",cat:"moenai",alias:["ふらいぱん","煎锅"],note_ja:"もえないごみ",note_zh:"不可燃",note_en:"Non-burnable",note_ko:"불연"},
+{name:"傘（金属骨）",zh:"雨伞",en:"Umbrella",ko:"우산",cat:"moenai",alias:["かさ","折りたたみ傘","折叠伞","雨伞"],note_ja:"もえないごみ",note_zh:"不可燃",note_en:"Non-burnable",note_ko:"불연"},
+{name:"鏡",zh:"镜子",en:"Mirror",ko:"거울",cat:"moenai",alias:["かがみ","化妆镜"],note_ja:"割れたものは紙に包んで",note_zh:"碎镜用纸包好",note_en:"Wrap if broken",note_ko:"깨진 것은 싸서"},
+{name:"ガラスの破片",zh:"碎玻璃",en:"Broken glass",ko:"깨진 유리",cat:"moenai",alias:["割れたガラス","玻璃渣"],note_ja:"紙に包んで「キケン」と表示",note_zh:"纸包好标注危险",note_en:"Wrap, label danger",note_ko:"싸서 위험 표시"},
+{name:"化粧品のびん",zh:"化妆品玻璃瓶",en:"Cosmetic glass bottle",ko:"화장품 유리병",cat:"moenai",alias:["香水瓶","こうすい"],note_ja:"飲食用以外のびんはもえないごみ",note_zh:"非饮食用玻璃瓶放不可燃（不进绿袋）",note_en:"Non-food bottles: non-burnable",note_ko:"불연"},
+{name:"電気シェーバー",zh:"电动剃须刀",en:"Electric shaver",ko:"전기면도기",cat:"moenai",alias:["シェーバー"],note_ja:"充電池は外して回収協力店へ",note_zh:"取出充电电池另送回收点，本体不可燃",note_en:"Remove battery first",note_ko:"배터리 분리 후 불연"},
+{name:"扇風機",zh:"电风扇",en:"Electric fan",ko:"선풍기",cat:"moenai",alias:["せんぷうき","风扇"],note_ja:"袋に入ればもえないごみ、入らなければ粗大",note_zh:"能装袋放不可燃，装不下按粗大",note_en:"Fits bag: non-burnable; else bulky",note_ko:"봉투에 안 들어가면 대형"},
+{name:"加湿器",zh:"加湿器",en:"Humidifier",ko:"가습기",cat:"moenai",alias:["かしつき"],note_ja:"袋に入ればもえないごみ",note_zh:"能装袋放不可燃",note_en:"Non-burnable if fits",note_ko:"불연"},
+{name:"電子レンジ",zh:"微波炉",en:"Microwave",ko:"전자레인지",cat:"moenai",alias:["れんじ","微波炉"],note_ja:"袋に入らなければ粗大ごみ",note_zh:"一般装不下袋→粗大垃圾",note_en:"Usually bulky waste",note_ko:"대형 가능성"},
+{name:"ゲーム機",zh:"游戏机",en:"Game console",ko:"게임기",cat:"moenai",alias:["Switch","スイッチ","PS5"],note_ja:"電池・バッテリーは外して",note_zh:"取出电池后不可燃，或小型家电回收",note_en:"Remove battery, non-burnable",note_ko:"배터리 분리"},
+{name:"延長コード",zh:"插线板/延长线",en:"Extension cord",ko:"멀티탭",cat:"moenai",alias:["電源タップ","コード","排插"],note_ja:"もえないごみ",note_zh:"不可燃",note_en:"Non-burnable",note_ko:"불연"},
+{name:"時計",zh:"钟表",en:"Clock/watch",ko:"시계",cat:"moenai",alias:["とけい","腕時計","手表","闹钟"],note_ja:"電池を外してもえないごみ",note_zh:"取出电池放不可燃",note_en:"Remove battery",note_ko:"전지 분리 후 불연"},
+{name:"水筒",zh:"水壶/保温杯",en:"Water bottle/thermos",ko:"텀블러",cat:"moenai",alias:["すいとう","タンブラー","保温杯"],note_ja:"金属製はもえないごみ、プラ製はもえるごみ",note_zh:"金属放不可燃，塑料放可燃",note_en:"Metal: non-burnable; plastic: burnable",note_ko:"금속 불연"},
+{name:"自転車の部品",zh:"自行车零件",en:"Bicycle parts",ko:"자전거 부품",cat:"moenai",alias:["チェーン","ペダル"],note_ja:"袋に入る部品はもえないごみ。車体は粗大",note_zh:"零件放不可燃，整车按粗大",note_en:"Parts non-burnable; whole bike bulky",note_ko:"차체는 대형"},
+{name:"針・画びょう",zh:"针/图钉",en:"Needle/thumbtack",ko:"바늘/압정",cat:"moenai",alias:["はり","缝衣针"],note_ja:"容器に入れて「キケン」と表示",note_zh:"装入小容器标注危险",note_en:"Put in container, label danger",note_ko:"용기에 넣어 위험 표시"},
+{name:"金属キャップ",zh:"金属瓶盖",en:"Metal cap",ko:"금속 뚜껑",cat:"moenai",alias:["びんのふた","王冠"],note_ja:"もえないごみ",note_zh:"不可燃",note_en:"Non-burnable",note_ko:"불연"},
+{name:"土鍋",zh:"砂锅",en:"Earthenware pot",ko:"뚝배기",cat:"moenai",alias:["どなべ"],note_ja:"陶器類はもえないごみ",note_zh:"陶瓷类放不可燃",note_en:"Ceramics: non-burnable",note_ko:"불연"},
+{name:"工具",zh:"工具",en:"Tools",ko:"공구",cat:"moenai",alias:["ドライバー","レンチ","スパナ","螺丝刀","扳手"],note_ja:"もえないごみ",note_zh:"不可燃",note_en:"Non-burnable",note_ko:"불연"},
+{name:"キーボード",zh:"键盘",en:"Keyboard",ko:"키보드",cat:"moenai",alias:["きーぼーど"],note_ja:"もえないごみ（小型家電回収も可）",note_zh:"不可燃（也可小型家电回收）",note_en:"Non-burnable",note_ko:"불연"},
+{name:"鍵",zh:"钥匙",en:"Key",ko:"열쇠",cat:"moenai",alias:["かぎ"],note_ja:"もえないごみ",note_zh:"不可燃",note_en:"Non-burnable",note_ko:"불연"},
+{name:"ビールびん",zh:"啤酒瓶",en:"Beer bottle",ko:"맥주병",cat:"recycle",alias:["酒びん","びーる"],note_ja:"中を軽くすすいでリサイクル袋（緑）へ",note_zh:"轻涮后放绿色回收袋",note_en:"Rinse, green recycling bag",note_ko:"헹궈서 초록 봉투"},
+{name:"ジャムのびん",zh:"果酱/调味料玻璃瓶",en:"Jam/food jar",ko:"잼 병",cat:"recycle",alias:["ガラスびん","调料瓶","罐头瓶"],note_ja:"飲食用ガラスびんはリサイクル袋（緑）",note_zh:"饮食用玻璃瓶放绿袋",note_en:"Food glass jars: green bag",note_ko:"초록 봉투"},
+{name:"スチール缶",zh:"铁罐",en:"Steel can",ko:"스틸캔",cat:"recycle",alias:["かんづめ","罐头"],note_ja:"中をすすいでリサイクル袋（緑）",note_zh:"涮净后放绿袋",note_en:"Rinse, green bag",note_ko:"초록 봉투"},
+{name:"缶ビール・缶チューハイ",zh:"啤酒/酒精饮料罐",en:"Beer/chuhai can",ko:"맥주캔",cat:"recycle",alias:["酎ハイ","易拉罐"],note_ja:"リサイクル袋（緑）",note_zh:"绿色回收袋",note_en:"Green bag",note_ko:"초록 봉투"},
+{name:"飲料びん（ジュース等）",zh:"饮料玻璃瓶",en:"Beverage glass bottle",ko:"음료 유리병",cat:"recycle",alias:["びん","玻璃瓶"],note_ja:"キャップを外してリサイクル袋（緑）",note_zh:"取下瓶盖放绿袋",note_en:"Remove cap, green bag",note_ko:"뚜껑 제거 후 초록 봉투"},
+{name:"段ボール",zh:"纸箱/快递箱",en:"Cardboard",ko:"골판지 상자",cat:"moeru",alias:["ダンボール","だんぼーる","快递盒","纸壳"],note_ja:"小さく切ればもえるごみ。量が多い場合は地域の資源回収へ",note_zh:"剪小后可燃；量大送地区资源回收点",note_en:"Cut small: burnable; large amounts: local recycling",note_ko:"작게 잘라 가연"},
+{name:"雑誌",zh:"杂志",en:"Magazine",ko:"잡지",cat:"moeru",alias:["ざっし","本","书"],note_ja:"もえるごみ、または資源回収へ",note_zh:"可燃，或送资源回收",note_en:"Burnable or recycling drive",note_ko:"가연 또는 자원회수"},
+{name:"紙袋",zh:"纸袋",en:"Paper bag",ko:"종이봉투",cat:"moeru",alias:["かみぶくろ"],note_ja:"もえるごみ",note_zh:"可燃",note_en:"Burnable",note_ko:"가연"},
+{name:"封筒・はがき",zh:"信封/明信片",en:"Envelope/postcard",ko:"봉투/엽서",cat:"moeru",alias:["ふうとう","信件"],note_ja:"もえるごみ",note_zh:"可燃",note_en:"Burnable",note_ko:"가연"},
+{name:"シュレッダーくず",zh:"碎纸屑",en:"Shredded paper",ko:"파쇄지",cat:"moeru",alias:["碎纸"],note_ja:"もえるごみ",note_zh:"可燃",note_en:"Burnable",note_ko:"가연"},
+{name:"ソファー",zh:"沙发",en:"Sofa",ko:"소파",cat:"sodai",alias:["そふぁ"],note_ja:"粗大ごみ（要予約・シール貼付）",note_zh:"粗大垃圾（需预约+贴票）",note_en:"Bulky (reserve + sticker)",note_ko:"대형(예약 필요)"},
+{name:"ベッド",zh:"床/床架",en:"Bed frame",ko:"침대",cat:"sodai",alias:["べっど","床架"],note_ja:"粗大ごみ（要予約）",note_zh:"粗大垃圾（需预约）",note_en:"Bulky waste",note_ko:"대형"},
+{name:"本棚",zh:"书架",en:"Bookshelf",ko:"책장",cat:"sodai",alias:["ほんだな","棚","置物架"],note_ja:"粗大ごみ（要予約）",note_zh:"粗大垃圾",note_en:"Bulky waste",note_ko:"대형"},
+{name:"椅子",zh:"椅子",en:"Chair",ko:"의자",cat:"sodai",alias:["いす","オフィスチェア","电竞椅"],note_ja:"袋に入らなければ粗大ごみ",note_zh:"装不进袋按粗大",note_en:"Bulky if does not fit bag",note_ko:"대형"},
+{name:"カーペット",zh:"地毯",en:"Carpet",ko:"카펫",cat:"sodai",alias:["じゅうたん","ラグ","地垫"],note_ja:"粗大ごみ",note_zh:"粗大垃圾",note_en:"Bulky waste",note_ko:"대형"},
+{name:"スーツケース",zh:"行李箱",en:"Suitcase",ko:"캐리어",cat:"sodai",alias:["キャリーケース","拉杆箱"],note_ja:"粗大ごみ",note_zh:"粗大垃圾",note_en:"Bulky waste",note_ko:"대형"},
+{name:"自転車",zh:"自行车",en:"Bicycle",ko:"자전거",cat:"sodai",alias:["じてんしゃ","ママチャリ","单车"],note_ja:"粗大ごみ（要予約）",note_zh:"粗大垃圾（需预约）",note_en:"Bulky (reserve)",note_ko:"대형(예약)"},
+{name:"衣装ケース",zh:"衣物收纳箱",en:"Storage case",ko:"수납 케이스",cat:"sodai",alias:["収納ボックス","整理箱"],note_ja:"袋に入らなければ粗大ごみ",note_zh:"装不下按粗大",note_en:"Bulky if large",note_ko:"대형"},
+{name:"テーブル",zh:"桌子/茶几",en:"Table",ko:"테이블",cat:"sodai",alias:["ローテーブル","こたつ","被炉"],note_ja:"粗大ごみ（要予約）",note_zh:"粗大垃圾",note_en:"Bulky waste",note_ko:"대형"},
+{name:"物干し竿",zh:"晾衣杆",en:"Laundry pole",ko:"빨래 건조대",cat:"sodai",alias:["ものほし","晾衣架"],note_ja:"粗大ごみ",note_zh:"粗大垃圾",note_en:"Bulky waste",note_ko:"대형"},
+{name:"タンス",zh:"衣柜/五斗柜",en:"Dresser/wardrobe",ko:"옷장",cat:"sodai",alias:["たんす","クローゼット"],note_ja:"粗大ごみ（要予約）",note_zh:"粗大垃圾",note_en:"Bulky waste",note_ko:"대형"},
+{name:"洗濯機",zh:"洗衣机",en:"Washing machine",ko:"세탁기",cat:"not_collected",alias:["せんたくき"],note_ja:"家電リサイクル法対象。購入店か指定引取場所へ",note_zh:"家电回收法对象，联系购买店或指定回收点",note_en:"Appliance Recycling Law: contact retailer",note_ko:"가전 리사이클법 대상"},
+{name:"衣類乾燥機",zh:"烘干机",en:"Clothes dryer",ko:"건조기",cat:"not_collected",alias:["かんそうき"],note_ja:"家電リサイクル法対象",note_zh:"家电回收法对象",note_en:"Recycling Law item",note_ko:"리사이클법 대상"},
+{name:"バイク",zh:"摩托车",en:"Motorcycle",ko:"오토바이",cat:"not_collected",alias:["原付","スクーター","电动车"],note_ja:"二輪車リサイクルシステムへ",note_zh:"通过二轮车回收系统处理",note_en:"Motorcycle recycling system",note_ko:"이륜차 리사이클"},
+{name:"消火器",zh:"灭火器",en:"Fire extinguisher",ko:"소화기",cat:"not_collected",alias:["しょうかき"],note_ja:"市で収集不可。リサイクル窓口へ",note_zh:"市不收集，送专门回收窗口",note_en:"Not collected; special recycling",note_ko:"수거 불가"},
+{name:"ガスボンベ（プロパン）",zh:"煤气罐",en:"Propane tank",ko:"프로판 가스통",cat:"not_collected",alias:["LPガス"],note_ja:"販売店へ返却",note_zh:"退还销售店",note_en:"Return to dealer",note_ko:"판매점 반환"},
+{name:"ピアノ",zh:"钢琴",en:"Piano",ko:"피아노",cat:"not_collected",alias:["電子ピアノ","电钢琴"],note_ja:"専門業者へ",note_zh:"联系专业回收商",note_en:"Specialist disposal",note_ko:"전문업체"},
+{name:"土・砂",zh:"土/沙",en:"Soil/sand",ko:"흙/모래",cat:"clean_center",alias:["つち","培养土","园艺土"],note_ja:"クリーンセンターへ直接搬入（有料）",note_zh:"自行运至清洁中心（收费）",note_en:"Deliver to Clean Center (paid)",note_ko:"클린센터 반입"},
+{name:"ブロック・レンガ",zh:"砖块/水泥块",en:"Bricks/blocks",ko:"벽돌/블록",cat:"clean_center",alias:["コンクリート"],note_ja:"クリーンセンターへ直接搬入",note_zh:"运至清洁中心",note_en:"Clean Center",note_ko:"클린센터"},
+{name:"大量の枝・幹",zh:"大量树枝",en:"Large branches",ko:"대량 나뭇가지",cat:"clean_center",alias:["剪定枝","庭木"],note_ja:"少量はもえるごみ、大量・太い幹は直接搬入",note_zh:"少量可燃，大量/粗干直接搬入",note_en:"Small: burnable; large: Clean Center",note_ko:"대량은 반입"}]}};
+
+// ===== Search =====
+function getCityData(cityId){return GOMI_DATA[cityId]||null}
+function getCategory(cityId,catId){const cd=getCityData(cityId);return cd?cd.categories.find(c=>c.id===catId)||null:null}
+function getCatColor(catId){const m={moeru:"var(--cat-moeru)",moenai:"var(--cat-moenai)",recycle:"var(--cat-recycle)",sodai:"var(--cat-sodai)",not_collected:"var(--cat-not_collected)",clean_center:"var(--cat-clean_center)"};return m[catId]||"var(--primary)"}
+function kanaNorm(str){return str.toLowerCase().replace(/[\u30a1-\u30f6]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60))}
+function esc(x){return String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function getAllItems(cityId){const cd=getCityData(cityId);if(!cd)return[];return cd.items.map(item=>({...item,_kw:[item.name,item.zh,item.en,item.ko,...(item.alias||[])].filter(Boolean).map(x=>kanaNorm(String(x).toLowerCase()))}))}
+function levenshtein(a,b){const m=a.length,n=b.length;if(m===0)return n;if(n===0)return m;const dp=Array.from({length:m+1},()=>new Uint8Array(n+1));for(let i=0;i<=m;i++)dp[i][0]=i;for(let j=0;j<=n;j++)dp[0][j]=j;for(let i=1;i<=m;i++){for(let j=1;j<=n;j++){const cost=a[i-1]===b[j-1]?0:1;dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+cost)}}return dp[m][n]}
+function editDistanceOk(q,t,max){if(t.length<=2)return false;if(/[\u4e00-\u9fff]/.test(t)&&t.length<=3)return false;return levenshtein(q,t)<=max}
+function fuzzyScore(query,keywords){if(!query||!keywords||keywords.length===0)return[false,0];const q=kanaNorm(query.trim().toLowerCase());if(!q)return[false,0];const qLen=q.length;for(const kw of keywords){if(kw===q)return[true,100]}for(const kw of keywords){if(kw.startsWith(q))return[true,90-Math.abs(kw.length-qLen)*2]}for(const kw of keywords){if(kw.includes(q))return[true,70]}for(const kw of keywords){if(q.includes(kw))return[true,50+kw.length*2]}const maxDist=qLen<=3?1:qLen<=6?2:3;for(const kw of keywords){if(editDistanceOk(q,kw,maxDist))return[true,40-levenshtein(q,kw)*5]}const parts=q.split(/[\s,，、]+/).filter(Boolean);if(parts.length>1){const matchCount=parts.filter(p=>keywords.some(k=>k.includes(p)||p.includes(k))).length;if(matchCount>=2)return[true,45+matchCount*5];if(matchCount===1&&parts.length===2)return[true,30]}const cjkChars=[...q].filter(c=>c.length===1&&/[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]/.test(c));if(cjkChars.length>=2){const matchCount=cjkChars.filter(char=>keywords.some(kw=>kw.includes(char))).length;const ratio=matchCount/cjkChars.length;if(ratio>=0.7&&matchCount>=2)return[true,20+matchCount*5];if(matchCount>=cjkChars.length-1&&cjkChars.length>=3)return[true,15]}return[false,0]}
+function searchItems(cityId,query){if(!query||!query.trim())return[];const items=getAllItems(cityId);const q=query.trim().toLowerCase();const scored=[];for(const item of items){const[match,score]=fuzzyScore(q,item._kw);if(match)scored.push({item,score})}scored.sort((a,b)=>b.score-a.score);return scored.slice(0,10).map(s=>s.item)}
+function getSuggestions(cityId,query){if(!query||query.trim().length<1)return[];const items=getAllItems(cityId);const q=query.trim().toLowerCase();const scored=[];for(const item of items){const[match,score]=fuzzyScore(q,item._kw);if(match)scored.push({item,score})}scored.sort((a,b)=>b.score-a.score);return scored.slice(0,5).map(s=>s.item)}
+function renderCategories(){const cityId=document.getElementById("city-select").value;const cd=getCityData(cityId);if(!cd)return;const grid=document.getElementById("categories-grid");grid.innerHTML=cd.categories.map(cat=>{const name=cat[`name_${currentLang}`]||cat.name_ja;const bag=cat[`bag_${currentLang}`]||cat.bag_ja||"";const desc=cat[`desc_${currentLang}`]||cat.desc_en||"";const color=getCatColor(cat.id);return`<div class="cat-card" style="border-left-color:${color}"><div class="cat-name">${name}</div><div class="cat-bag" style="color:${color}">${bag}</div><div class="cat-desc">${desc}</div></div>`}).join("")}
+function renderResults(results,cityId){const section=document.getElementById("result-section");const card=document.getElementById("result-card");if(!results||results.length===0){section.classList.remove("hidden");const q=document.getElementById("search-input").value;const rules=t("fallback_rules").split("|").map(r=>`<div style="padding:4px 0;font-size:13px;text-align:left">${r}</div>`).join("");card.innerHTML=`<div class="no-result">${t("no_result",{q:esc(q)})}<div style="margin-top:14px;font-weight:600;font-size:13px;text-align:left">${t("fallback_title")}</div>${rules}<div style="margin-top:10px;font-size:12px;color:var(--text-tertiary);text-align:left">${t("fallback_contact")}</div></div>`;card.dataset.lastSearch="";return}section.classList.remove("hidden");let html=`<div class="match-info">${t("match_prefix")}${results.length}${t("match_suffix")}</div>`;results.forEach((item,idx)=>{const cat=getCategory(cityId,item.cat);const catName=cat?(cat[`name_${currentLang}`]||cat.name_ja):item.cat;const bagInfo=cat?(cat[`bag_${currentLang}`]||cat.bag_ja||""):"";const color=getCatColor(item.cat);const noteKey=`note_${currentLang}`;const note=item[noteKey]||item.note_ja||"";const emoji=item.cat==="moeru"?"🔥":item.cat==="moenai"?"⛔":item.cat==="recycle"?"♻️":item.cat==="sodai"?"📦":item.cat==="not_collected"?"⚠️":"🚚";html+=`<div class="result-header" style="background:${color}"><span class="emoji">${emoji}</span><div><div class="cat-title">${catName}</div><div class="bag-name">${bagInfo}</div></div></div><div class="result-body"><div class="result-item"><span class="label">${t("ja_name")}</span><span class="value">${item.name}</span></div>${note?`<div class="result-divider"></div><div class="result-item"><span class="label">${t("how_to")}</span><span class="value note">${note}</span></div>`:""}<div class="result-divider"></div><div class="result-item"><span class="label">${t("bag_type")}</span><span class="value" style="color:${color}">${bagInfo}</span></div></div>`;if(idx<results.length-1)html+=`<div style="height:8px"></div>`});card.innerHTML=html;card.dataset.lastSearch=document.getElementById("search-input").value}
+function renderSuggestions(results){const el=document.getElementById("suggestions");if(!results||results.length===0){el.classList.remove("show");return}const cityId=document.getElementById("city-select").value;el.innerHTML=results.map(item=>{const cat=getCategory(cityId,item.cat);const catName=cat?(cat[`name_${currentLang}`]||cat.name_ja):"";const color=getCatColor(item.cat);return`<div class="suggestion-item" data-item="${item.name}"><span class="s-cat" style="background:${color}">${catName}</span><span class="s-name">${item[currentLang]||item.zh||item.name}</span><span class="s-ja">${item.name}</span></div>`}).join("");el.classList.add("show")}
+const HISTORY_KEY="gomi_history",MAX_HISTORY=5;
+function getHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY))||[]}catch{return[]}}
+function addHistory(query){if(!query||!query.trim())return;const h=getHistory().filter(s=>s!==query.trim());h.unshift(query.trim());if(h.length>MAX_HISTORY)h.length=MAX_HISTORY;localStorage.setItem(HISTORY_KEY,JSON.stringify(h));renderHistory()}
+function clearHistory(){localStorage.removeItem(HISTORY_KEY);renderHistory()}
+function renderHistory(){const section=document.getElementById("history-section"),list=document.getElementById("history-list"),h=getHistory();if(h.length===0){section.classList.add("hidden");return}section.classList.remove("hidden");document.getElementById("history-label").textContent=t("history_label");document.getElementById("history-clear-btn").textContent=t("history_clear");list.innerHTML=h.map(s=>`<div class="history-item" data-q="${esc(s)}"><span class="h-icon">🕐</span><span class="h-text">${esc(s)}</span><button class="h-del" data-q="${esc(s)}">✕</button></div>`).join("");list.querySelectorAll(".history-item").forEach(el=>{el.addEventListener("click",function(e){if(e.target.closest(".h-del"))return;const q=this.dataset.q;document.getElementById("search-input").value=q;performSearch(q)})});list.querySelectorAll(".h-del").forEach(btn=>{btn.addEventListener("click",function(e){e.stopPropagation();const q=this.dataset.q;const h=getHistory().filter(s=>s!==q);localStorage.setItem(HISTORY_KEY,JSON.stringify(h));renderHistory()})})}
+function performSearch(query){const cityId=document.getElementById("city-select").value;const results=searchItems(cityId,query);renderResults(results,cityId);addHistory(query);document.getElementById("suggestions").classList.remove("show");document.getElementById("history-section").classList.add("hidden")}
+
+// ===== 快捷标签（多语言） =====
+const QUICK_TAGS=[{item:"ペットボトル",emoji:"🥤"},{item:"空き缶",emoji:"🥫"},{item:"新聞紙",emoji:"📰"},{item:"乾電池",emoji:"🔋"},{item:"食品トレイ",emoji:"📦"}];
+function renderQuickTags(){const el=document.getElementById("quick-tags");const items=getAllItems(document.getElementById("city-select").value);el.innerHTML=QUICK_TAGS.map(q=>{const found=items.find(i=>i.name===q.item);const name=found?found[currentLang]||found.zh||found.name:q.item;return`<span class="tag" data-item="${q.item}">${q.emoji} ${name}</span>`}).join("")}
+
+// ===== Speech（长按录音，松开完成） =====
+let recognition=null,isListening=false,pressing=false,micPressTimer=null;
+function initSpeech(){const isMobile=/Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR&&!isMobile){document.getElementById("mic-btn").style.opacity=".35";document.getElementById("mic-btn").title=t("not_supported");return}if(isMobile){document.getElementById("mic-btn").title=t("mic_fallback");return}recognition=new SR();recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;recognition.onresult=e=>{if(pressing){const t=e.results[0][0].transcript;document.getElementById("search-input").value=t;document.getElementById("suggestions").classList.remove("show");performSearch(t)}};recognition.onerror=e=>{if(e.error!=="no-speech"&&e.error!=="aborted")console.warn("Speech:",e.error)};recognition.onend=()=>{if(pressing)pressing=false;stopVisual()}}
+function micPress(e){e.preventDefault();pressing=true;document.getElementById("mic-btn").classList.add("listening");if(recognition){try{recognition.lang=currentLang==="zh"?"zh-CN":currentLang==="ja"?"ja-JP":currentLang==="ko"?"ko-KR":"en-US";recognition.start();showSpeechStatus();micPressTimer=setTimeout(()=>{if(pressing){try{recognition.stop()}catch{}micRelease()}},8000)}catch(e){micRelease()}}else{document.getElementById("search-input").focus();showMobileHint()}}
+function micRelease(e){if(e)e.preventDefault();if(!pressing)return;pressing=false;if(micPressTimer){clearTimeout(micPressTimer);micPressTimer=null}stopVisual();if(recognition){try{recognition.stop()}catch{}setTimeout(hideSpeechStatus,200)}else{hideSpeechStatus()}}
+function showMobileHint(){const el=document.getElementById("speech-status");el.classList.remove("hidden");document.getElementById("speech-text").innerHTML="🎤 "+t("mic_fallback");document.getElementById("speech-hint").textContent="";document.querySelector(".speech-wave")&&(document.querySelector(".speech-wave").style.display="none");setTimeout(()=>{if(!pressing){el.classList.add("hidden");document.querySelector(".speech-wave")&&(document.querySelector(".speech-wave").style.display="")}},3000)}
+function stopVisual(){document.getElementById("mic-btn").classList.remove("listening")}
+function showSpeechStatus(){const el=document.getElementById("speech-status");el.classList.remove("hidden");document.getElementById("speech-text").textContent=t("listening");document.getElementById("speech-hint").textContent=t("speak_hint")}
+function hideSpeechStatus(){document.getElementById("speech-status").classList.add("hidden")}
+
+// ===== App =====
+document.addEventListener("DOMContentLoaded",()=>{
+  const $=id=>document.getElementById(id),searchInput=$("search-input"),searchBtn=$("search-btn"),micBtn=$("mic-btn"),clearBtn=$("clear-btn"),citySelect=$("city-select");
+  const i18nMap={subtitle:"subtitle","help-title":"help_title","footer-text":"footer_text","history-label":"history_label","history-clear-btn":"history_clear"};
+  for(const[id,key]of Object.entries(i18nMap)){const el=document.getElementById(id);if(el)el.dataset.i18n=key}
+  searchInput.placeholder=t("search_placeholder");
+  document.querySelectorAll(".lang-btn").forEach(b=>b.classList.toggle("active",b.dataset.lang===currentLang));
+  document.querySelectorAll("[data-i18n]").forEach(el=>{const key=el.dataset.i18n;if(key==="mic_title"||key==="search_title")el.title=t(key);else el.textContent=t(key)});
+  initSpeech();renderCategories();renderQuickTags();renderHistory();
+  document.querySelectorAll(".lang-btn").forEach(btn=>{btn.addEventListener("click",()=>setLang(btn.dataset.lang))});
+  searchBtn.addEventListener("click",()=>{const q=searchInput.value.trim();if(q){document.getElementById("suggestions").classList.remove("show");performSearch(q)}});
+  searchInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();const q=searchInput.value.trim();if(q){document.getElementById("suggestions").classList.remove("show");performSearch(q)}}});
+  let suggestTimer=null;
+  searchInput.addEventListener("input",()=>{clearTimeout(suggestTimer);const q=searchInput.value.trim();clearBtn.classList.toggle("hidden",!q);if(q.length<1){document.getElementById("suggestions").classList.remove("show");return}suggestTimer=setTimeout(()=>{renderSuggestions(getSuggestions(citySelect.value,q))},80)});
+  document.getElementById("suggestions").addEventListener("click",e=>{const item=e.target.closest(".suggestion-item");if(!item)return;const val=item.dataset.item;searchInput.value=val;document.getElementById("suggestions").classList.remove("show");performSearch(val)});
+  clearBtn.addEventListener("click",()=>{searchInput.value="";clearBtn.classList.add("hidden");searchInput.focus();document.getElementById("suggestions").classList.remove("show");$("result-section").classList.add("hidden");$("history-section").classList.remove("hidden");renderHistory()});
+  document.addEventListener("click",e=>{if(!e.target.closest(".input-group"))document.getElementById("suggestions").classList.remove("show")});
+  micBtn.addEventListener("pointerdown",micPress);
+  document.addEventListener("pointerup",e=>{const btn=document.getElementById("mic-btn");if(pressing&&(!e.target.closest||!e.target.closest("#mic-btn")))micRelease(e)});
+  micBtn.addEventListener("pointerleave",e=>{if(pressing)micRelease(e)});
+  document.querySelectorAll(".tag").forEach(tag=>{tag.addEventListener("click",()=>{searchInput.value=tag.dataset.item;document.getElementById("suggestions").classList.remove("show");performSearch(tag.dataset.item)})});
+  citySelect.addEventListener("change",()=>{renderCategories();$("result-section").classList.add("hidden");$("history-section").classList.remove("hidden");renderHistory()});
+  $("history-clear-btn").addEventListener("click",clearHistory);
+});
+</script>
+</body>
+</html>
