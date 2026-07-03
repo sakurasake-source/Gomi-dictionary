@@ -87,7 +87,7 @@ Sorting rules are compiled from official Itoshima City materials. This is an uno
 
 ## 🛠️ Tech
 
-Pure HTML + CSS + Vanilla JavaScript. No frameworks, no dependencies, no build step. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
+Pure HTML + CSS + Vanilla JavaScript. No frameworks, no dependencies, no build step. See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
 
 ## 🤝 Contributing
 
