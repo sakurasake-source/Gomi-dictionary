@@ -6,6 +6,15 @@ Multilingual garbage sorting dictionary for **Itoshima City, Fukuoka, Japan** �
 
 > 🔗 **Live Demo**: https://sakurasake-source.github.io/Gomi-dictionary/
 
+<p align="center">
+  <img src="docs/screenshot-mobile.png" alt="Mobile screenshot" width="380">
+</p>
+
+<p align="center">
+  📱 Scan to open on your phone:<br>
+  <img src="docs/qr-code.png" alt="QR code" width="140">
+</p>
+
 ---
 
 ## 🇨🇳 中文
